@@ -1,0 +1,35 @@
+name: Signaux trading
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: signaux
+  cancel-in-progress: false
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer requests
+        run: pip install requests
+
+      - name: Retrouver la mémoire du bot
+        uses: actions/cache@v4
+        with:
+          path: etat.json
+          key: etat-${{ github.run_id }}
+          restore-keys: etat-
+
+      - name: Lancer le bot
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        run: python signaux.py
